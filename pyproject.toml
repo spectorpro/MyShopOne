@@ -8,6 +8,7 @@ readme = "README.md"
 [tool.poetry.dependencies]
 python = "^3.14"
 psycopg2-binary = "^2.9.12"
+pillow = "^12.3.0"
 
 
 [build-system]
