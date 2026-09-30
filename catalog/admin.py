@@ -1,13 +1,11 @@
 from django.contrib import admin
 from .models import Category, Product
 
-
 @admin.register(Category)
 class CategoryAdmin(admin.ModelAdmin):
     list_display = ('id', 'name', 'description')
     search_fields = ('name',)
     list_per_page = 20
-
 
 @admin.register(Product)
 class ProductAdmin(admin.ModelAdmin):
@@ -17,7 +15,7 @@ class ProductAdmin(admin.ModelAdmin):
     # Фильтры справа
     list_filter = ('category', 'created_at')
 
-    # Поиск по названию и описанию
+    # Поиск по названию, описанию и имени категории
     search_fields = ('name', 'description', 'category__name')
 
     # Поля, доступные для редактирования на странице товара
