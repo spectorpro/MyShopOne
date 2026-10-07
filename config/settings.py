@@ -25,9 +25,11 @@ DEBUG = True
 ALLOWED_HOSTS = []
 
 
-# Application definition
+AUTH_USER_MODEL = 'users.User'
+LOGIN_URL = 'login'
 
 INSTALLED_APPS = [
+    'users',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -131,3 +133,6 @@ MAILERS = {
 
 MEDIA_URL = '/media/'
 MEDIA_ROOT = BASE_DIR / 'media'
+
+EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
+DEFAULT_FROM_EMAIL = 'noreply@myshop.local'
