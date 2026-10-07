@@ -1,0 +1,15 @@
+
+{% extends "base.html" %}
+
+{% block content %}
+  {% include "partials/main_menu.html" %}
+
+  <h1>Удалить статью</h1>
+  <p>Вы уверены, что хотите удалить статью «{{ object.title }}»?</p>
+
+  <form method="post">
+    {% csrf_token %}
+    <button type="submit">Да, удалить</button>
+    <a href="{% url 'blog_detail' pk=object.pk %}">Отмена</a>
+  </form>
+{% endblock %}
