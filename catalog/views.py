@@ -3,6 +3,8 @@ from django.urls import reverse_lazy
 from django.views.generic import ListView, DetailView, CreateView, UpdateView, DeleteView, TemplateView
 from .forms import ProductForm
 from .models import Product
+from django.contrib.auth.decorators import login_required
+from django.shortcuts import get_object_or_404, redirect
 
 
 class HomeView(ListView):
@@ -81,3 +83,12 @@ def product_delete(request, pk):  # закрытый
         product.delete()
         return redirect('product_list')
     return render(request, 'catalog/product_confirm_delete.html', {'product': product})
+
+@login_required
+def unpublish_product(request, pk):
+    product = get_object_or_404(Product, pk=pk)
+    if product.owner != request.user and not request.user.has_perm('catalog.can_unpublish_product'):
+        return redirect('product_detail', pk=product.pk)
+    product.is_published = False
+    product.save()
+    return redirect('product_list')

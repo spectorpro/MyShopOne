@@ -1,25 +1,18 @@
-{% extends "base.html" %}
 
-{% block title %}{{ product.name }} — My Shop{% endblock %}
+{% if product.owner == user or user.has_perm('catalog.change_product') %}
+  <a href="{% url 'product_update' product.pk %}">Редактировать</a>
+{% endif %}
 
-{% block content %}
-<div class="row">
-    <div class="col-md-5">
-        {% if product.image %}
-            <img src="{{ product.image.url }}" class="img-fluid rounded" alt="{{ product.name }}">
-        {% else %}
-            <div class="bg-light d-flex align-items-center justify-content-center" style="height: 300px;">
-                <span class="text-muted">Нет изображения</span>
-            </div>
-        {% endif %}
-    </div>
-    <div class="col-md-7">
-        <h1>{{ product.name }}</h1>
-        <p class="fs-4 fw-bold text-primary">{{ product.price }} ₽</p>
-        <hr>
-        <h5>Описание</h5>
-        <p>{{ product.description|linebreaks }}</p>
-        <a href="{% url 'home' %}" class="btn btn-outline-secondary">← Вернуться к списку</a>
-    </div>
-</div>
-{% endblock %}
+{% if product.owner == user or user.has_perm('catalog.delete_product') %}
+  <form method="post" action="{% url 'delete_product' product.pk %}" style="display:inline;">
+    {% csrf_token %}
+    <button type="submit">Удалить</button>
+  </form>
+{% endif %}
+
+{% if product.owner == user or user.has_perm('catalog.can_unpublish_product') %}
+  <form method="post" action="{% url 'unpublish_product' product.pk %}" style="display:inline;">
+    {% csrf_token %}
+    <button type="submit">Снять с публикации</button>
+  </form>
+{% endif %}
