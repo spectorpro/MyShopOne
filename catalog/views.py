@@ -92,3 +92,10 @@ def unpublish_product(request, pk):
     product.is_published = False
     product.save()
     return redirect('product_list')
+
+@permission_required('catalog.can_unpublish_product', raise_exception=True)
+def unpublish_product(request, pk):
+    product = get_object_or_404(Product, pk=pk)
+    product.is_published = False
+    product.save()
+    return redirect('product_detail', pk=product.pk)

@@ -23,7 +23,6 @@ class Product(models.Model):
     category = models.ForeignKey(Category, on_delete=models.CASCADE, related_name='products', verbose_name='Категория')
     price = models.DecimalField(max_digits=10, decimal_places=2, verbose_name='Цена')
 
-    # Самое важное: используем настройки, а не жёсткую модель User
 
     owner = models.ForeignKey(
         settings.AUTH_USER_MODEL,
@@ -37,6 +36,9 @@ class Product(models.Model):
     is_published = models.BooleanField(default=False, verbose_name='Опубликован')
     created_at = models.DateTimeField(default=timezone.now, verbose_name='Дата создания')
     updated_at = models.DateTimeField(auto_now=True, verbose_name='Дата последнего изменения')
+
+    class Meta:
+        permissions = [("can_unpublish_product", "Может снимать продукт с публикации")]
 
     class Meta:
         verbose_name = 'Товар'
