@@ -3,8 +3,8 @@ from django.urls import reverse_lazy
 from django.views.generic import ListView, DetailView, CreateView, UpdateView, DeleteView, TemplateView
 from .forms import ProductForm
 from .models import Product
-from django.contrib.auth.decorators import login_required
-from django.shortcuts import get_object_or_404, redirect
+from django.shortcuts import render, redirect, get_object_or_404
+from django.contrib.auth.decorators import login_required, permission_required
 
 
 class HomeView(ListView):
@@ -24,11 +24,22 @@ class ProductDetailView(DetailView):
     context_object_name = 'product'
 
 
+class ProductListView(ListView):
+    model = Product
+    template_name = 'catalog/product_list.html'
+    context_object_name = 'products'
+    paginate_by = 10
+
+
 class ProductCreateView(LoginRequiredMixin, CreateView):
     model = Product
-    form_class = ProductForm
+    form_class = ProductForm  # <-- Используем форму с валидацией
     template_name = 'catalog/product_form.html'
     success_url = reverse_lazy('catalog:product_list')
+
+    def form_valid(self, form):
+        form.instance.owner = self.request.user
+        return super().form_valid(form)
 
 
 class ProductUpdateView(LoginRequiredMixin, UpdateView):
@@ -37,65 +48,28 @@ class ProductUpdateView(LoginRequiredMixin, UpdateView):
     template_name = 'catalog/product_form.html'
     success_url = reverse_lazy('catalog:product_list')
 
+    def dispatch(self, request, *args, **kwargs):
+        obj = self.get_object()
+        if obj.owner != request.user and not request.user.has_perm('catalog.can_unpublish_product'):
+            return redirect('catalog:product_detail', pk=obj.pk)
+        return super().dispatch(request, *args, **kwargs)
+
 
 class ProductDeleteView(LoginRequiredMixin, DeleteView):
     model = Product
     template_name = 'catalog/product_confirm_delete.html'
     success_url = reverse_lazy('catalog:product_list')
 
+    def dispatch(self, request, *args, **kwargs):
+        obj = self.get_object()
+        if obj.owner != request.user and not request.user.has_perm('catalog.can_unpublish_product'):
+            return redirect('catalog:product_detail', pk=obj.pk)
+        return super().dispatch(request, *args, **kwargs)
 
-class ProductListView(ListView):
-    model = Product
-    template_name = 'catalog/product_list.html'
-    context_object_name = 'products'
-
-def product_list(request):  # публичный
-    products = Product.objects.all()
-    return render(request, 'catalog/product_list.html', {'products': products})
-
-@login_required
-def product_create(request):  # закрытый
-    if request.method == 'POST':
-        form = ProductForm(request.POST, request.FILES)
-        if form.is_valid():
-            form.save()
-            return redirect('product_list')
-    else:
-        form = ProductForm()
-    return render(request, 'catalog/product_form.html', {'form': form})
-
-@login_required
-def product_update(request, pk):  # закрытый
-    product = get_object_or_404(Product, pk=pk)
-    if request.method == 'POST':
-        form = ProductForm(request.POST, request.FILES, instance=product)
-        if form.is_valid():
-            form.save()
-            return redirect('product_list')
-    else:
-        form = ProductForm(instance=product)
-    return render(request, 'catalog/product_form.html', {'form': form})
-
-@login_required
-def product_delete(request, pk):  # закрытый
-    product = get_object_or_404(Product, pk=pk)
-    if request.method == 'POST':
-        product.delete()
-        return redirect('product_list')
-    return render(request, 'catalog/product_confirm_delete.html', {'product': product})
-
-@login_required
-def unpublish_product(request, pk):
-    product = get_object_or_404(Product, pk=pk)
-    if product.owner != request.user and not request.user.has_perm('catalog.can_unpublish_product'):
-        return redirect('product_detail', pk=product.pk)
-    product.is_published = False
-    product.save()
-    return redirect('product_list')
 
 @permission_required('catalog.can_unpublish_product', raise_exception=True)
 def unpublish_product(request, pk):
     product = get_object_or_404(Product, pk=pk)
     product.is_published = False
     product.save()
-    return redirect('product_detail', pk=product.pk)
+    return redirect('catalog:product_detail', pk=product.pk)

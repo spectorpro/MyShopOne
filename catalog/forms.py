@@ -23,7 +23,7 @@ MAX_IMAGE_SIZE = 5 * 1024 * 1024  # 5 МБ
 class ProductForm(forms.ModelForm):
     class Meta:
         model = Product
-        fields = ('name', 'description', 'image', 'category', 'price')
+        exclude = ['owner']
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
