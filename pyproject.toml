@@ -10,6 +10,8 @@ python = "^3.14"
 psycopg2-binary = "^2.9.12"
 pillow = "^12.3.0"
 django = "^6.1.1"
+django-redis = "^7.0.0"
+redis = "^8.1.0"
 
 
 [build-system]
