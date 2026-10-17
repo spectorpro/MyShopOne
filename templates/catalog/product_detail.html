@@ -1,0 +1,7 @@
+
+{% if product.owner == user or user.has_perm('catalog.can_unpublish_product') %}
+    <form method="post" action="{% url 'unpublish_product' product.pk %}" style="display:inline;">
+        {% csrf_token %}
+        <button type="submit" class="btn btn-warning">Снять с публикации</button>
+    </form>
+{% endif %}

@@ -1,0 +1,31 @@
+{% extends "base.html" %}
+
+{% block content %}
+  {% include "partials/main_menu.html" %}
+
+  <h1>Блог</h1>
+  {% for post in posts %}
+    <article>
+      <h2><a href="{% url 'blog_detail' pk=post.pk %}">{{ post.title }}</a></h2>
+      <p>{{ post.created_at|date:"d.m.Y H:i" }}</p>
+      <p>{{ post.views }} просмотров</p>
+      {{ post.content|truncatewords:30 }}
+    </article>
+    <hr>
+  {% empty %}
+    <p>Нет опубликованных статей.</p>
+  {% endfor %}
+
+  <!-- Пагинация (если включена) -->
+  {% if is_paginated %}
+    <div class="pagination">
+      {% if page_obj.has_previous %}
+        <a href="?page={{ page_obj.previous_page_number }}">← Предыдущая</a>
+      {% endif %}
+      Страница {{ page_obj.number }} из {{ page_obj.paginator.num_pages }}
+      {% if page_obj.has_next %}
+        <a href="?page={{ page_obj.next_page_number }}">Следующая →</a>
+      {% endif %}
+    </div>
+  {% endif %}
+{% endblock %}
